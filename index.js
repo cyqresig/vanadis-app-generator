@@ -4,7 +4,6 @@
  * @since 2017-04-23 18:55
  * @author chenyiqin
  */
-
 'use strict';
 
 var chalk = require('chalk');
@@ -24,4 +23,4 @@ if (majorVersion < 4) {
     );
 }
 
-require('./generator');
+require('./command');
