@@ -40,7 +40,7 @@ program
     });
 
 program
-    .command(generateCommand + ' <project-directory>')
+    .command(generateCommand + ' [project-directory]')
     .option('--verbose', 'print additional logs')
     .option(
         '--tpl [template-package]',
@@ -104,7 +104,7 @@ if (typeof currentCommand === 'undefined') {
     process.exit(1);
 }
 
-if (typeof projectName === 'undefined') {
+if (typeof projectName === 'undefined' && currentCommand === generateCommand) {
     console.error('Please specify the project directory:');
     console.log(
         ' ' + chalk.cyan(program.name()) + ' ' + generateCommand + ' ' + chalk.green('<project-directory>')
