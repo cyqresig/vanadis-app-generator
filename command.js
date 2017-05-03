@@ -4,6 +4,7 @@
  */
 'use strict';
 
+var path = require('path');
 var chalk = require('chalk');
 var commander = require('commander');
 var inquirer = require('inquirer');
@@ -177,9 +178,10 @@ function upperCaseFisrtLetter(str) {
 
 function addTplOrRepo(name, fileName) {
     var list = require(fileName);
+    var filePath = path.join(__dirname, fileName);
     if (list.indexOf(name) === -1) {
         list.unshift(name);
-        fs.writeFileSync(fileName, JSON.stringify(list, null, 4));
+        fs.writeFileSync(filePath, JSON.stringify(list, null, 4));
     }
 }
 
