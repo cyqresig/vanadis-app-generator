@@ -14,8 +14,12 @@ var chalk = require('chalk');
 
 var templatePackageSuffix = '-template';
 var modulePath = 'node_modules';
-var ignorePackageJSONKeys = ['name', 'version', 'readme', 'optionalDependencies', 'maintainers', 'gitHead', 'dist', 'directories', 'description', 'author'];
+var ignorePackageJSONKeys = ['name', 'version', 'readme', 'optionalDependencies', 'maintainers', 'gitHead', 'dist', 'directories', 'description', 'author', 'publish_time'];
 var packageJSONFileName = 'package.json';
+var npmignoreFileName = '.npmignore';
+var gitignoreFileName = '.gitignore';
+var npmrcFakeFileName = 'npmrc';
+var npmrcFileName = '.npmrc';
 var repoDirectory = 'repository';
 var repoPath = path.join(__dirname, repoDirectory);
 var isVerbose;
@@ -31,29 +35,28 @@ function initByNPM(name, tplName, verbose) {
     packageName = templateName + templatePackageSuffix;
     templatePath = path.join(modulePath, packageName);
     isVerbose = verbose;
-    console.log('initByNPM...templateName = ', templateName)
-    console.log('initByNPM...projectName = ', projectName)
     createDirectory().then(function () {
         return installTemplatePackage()
     }).then(function () {
         return copy(templatePath);
     }).then(function () {
+        restoreIgnoreFiles();
+    }).then(function () {
+        removeTemplate(templatePath)
+    }).then(function () {
         rewritePackageJSON();
     }).then(function () {
         return installDependencies();
     }).then(function () {
-        console.log('init success!');
-        // @todo show init success message lines
+        showSuccessMessage();
     }).catch(function (error) {
-        console.log(error);
+        console.error(error);
     });
 }
 
 function initByGit(name, repositoryUrl, verbose) {
     projectName = name;
     isVerbose = verbose;
-    console.log('initByGit...projectName = ', projectName)
-    console.log('initByGit...repositoryUrl =', repositoryUrl)
     createDirectory().then(function () {
         return gitCloneRepository(repositoryUrl);
     }).then(function () {
@@ -61,14 +64,17 @@ function initByGit(name, repositoryUrl, verbose) {
     }).then(function () {
         return copy(repoPath);
     }).then(function () {
+        removeFakeFiles();
+    }).then(function () {
+        removeTemplate(repoPath);
+    }).then(function () {
         rewritePackageJSON();
     }).then(function () {
         return installDependencies();
     }).then(function () {
-        console.log('init success!');
-        // @todo show init success message lines
+        showSuccessMessage();
     }).catch(function (error) {
-        console.log(error);
+        console.error(error);
     });
 }
 
@@ -106,7 +112,7 @@ function checkAppName(appName) {
     const validationResult = validateProjectName(appName);
     if (!validationResult.validForNewPackages) {
         console.error(
-            `Could not create a project called ${chalk.red(`"${appName}"`)} because of npm naming restrictions:`
+            'Could not create a project called ' + chalk.red('"' + appName + '"') + ' because of npm naming restrictions:'
         );
         printValidationResults(validationResult.errors);
         printValidationResults(validationResult.warnings);
@@ -116,16 +122,12 @@ function checkAppName(appName) {
 
 function createDirectory() {
     return new Promise(function (resolve, reject) {
-        console.log('dirPath = ', dirPath)
-        console.log('projectName = ', projectName)
 
         var dirPath = process.cwd();
         projectPath = path.join(dirPath, projectName);
         if (fs.existsSync(projectPath)) {
-            console.log('directory already exist');
             reject('directory already exist');
         } else {
-            console.log('fs.mkdirSync...');
             fs.mkdirSync(projectPath);
             resolve();
         }
@@ -137,16 +139,11 @@ function installTemplatePackage() {
         var command;
         var args;
         var child;
-        var packagePath = path.join(__dirname, modulePath, packageName);
         process.chdir(__dirname);
         checkNpmVersion();
         checkAppName(projectName);
         command = 'npm';
-
-        console.log('packagePath = ', packagePath)
-        console.log('fs.existsSync(packagePath) = ', fs.existsSync(packagePath))
-
-        args = [fs.existsSync(packagePath) ? 'upgrade' : 'install'].concat(packageName);
+        args = ['install'].concat(packageName);
         if (isVerbose) {
             args.push('--verbose');
         }
@@ -195,20 +192,15 @@ function gitCloneRepository(repositoryUrl) {
 
 function copy(templatePath) {
     return new Promise(function (resolve, reject) {
-        console.log('copy templatePath = ', templatePath)
-        console.log('copy projectPath = ', projectPath)
         fs.copy(templatePath, projectPath).then(function () {
-            console.log('copy success');
             resolve();
         }).catch(function (error) {
             reject(error);
         });
     });
-    // fs.createReadStream(packagePath).pipe(fs.createWriteStream(projectPath));
 }
 
 function rewritePackageJSON() {
-    console.log('projectPath ;;;; ', projectPath)
     var packageJSONFilePath = path.join(projectPath, packageJSONFileName);
     var packageJSON = fs.readJsonSync(packageJSONFilePath);
     var newPackageJSON = {
@@ -257,6 +249,37 @@ function installDependencies() {
 function clearRepositoryGitFiles() {
     process.chdir(repoPath);
     execSync('find . -name ".git" | xargs rm -Rf');
+}
+
+function removeTemplate(templatePath) {
+    fs.removeSync(templatePath);
+}
+
+function restoreIgnoreFiles() {
+    var npmignoreFilePath = path.join(projectPath, npmignoreFileName);
+    var gitignoreFilePath = path.join(projectPath, gitignoreFileName);
+    var npmrcFakeFilePath = path.join(projectPath, npmrcFakeFileName);
+    var npmrcFilePath = path.join(projectPath, npmrcFileName);
+    if (fs.existsSync(npmignoreFilePath)) {
+        fs.renameSync(npmignoreFilePath, gitignoreFilePath);
+    }
+    if (fs.existsSync(npmrcFakeFilePath)) {
+        fs.renameSync(npmrcFakeFilePath, npmrcFilePath);
+    }
+}
+
+function removeFakeFiles() {
+    var npmrcFakeFilePath = path.join(projectPath, npmrcFakeFileName);
+    if (fs.existsSync(npmrcFakeFilePath)) {
+        fs.removeSync(npmrcFakeFilePath);
+    }
+}
+
+function showSuccessMessage() {
+    console.log();
+    console.log(`Success! Created ${projectName} at ${projectPath}`);
+    console.log();
+    console.log('Happy hacking!');
 }
 
 module.exports = {
