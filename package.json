@@ -1,6 +1,6 @@
 {
   "name": "vanadis-app-generator",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1-beta.2",
   "description": "Create app with no build configuration.",
   "bin": {
     "vanadis-app": "index.js"
