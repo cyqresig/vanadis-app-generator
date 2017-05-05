@@ -35,21 +35,21 @@ function initByNPM(name, tplName, verbose) {
     packageName = templateName + templatePackageSuffix;
     templatePath = path.join(modulePath, packageName);
     isVerbose = verbose;
-    createDirectory().then(function () {
+    createDirectory().then(function() {
         return installTemplatePackage()
-    }).then(function () {
+    }).then(function() {
         return copy(templatePath);
-    }).then(function () {
+    }).then(function() {
         restoreIgnoreFiles();
-    }).then(function () {
+    }).then(function() {
         removeTemplate(templatePath)
-    }).then(function () {
+    }).then(function() {
         rewritePackageJSON();
-    }).then(function () {
+    }).then(function() {
         return installDependencies();
-    }).then(function () {
+    }).then(function() {
         showSuccessMessage();
-    }).catch(function (error) {
+    }).catch(function(error) {
         console.error(error);
     });
 }
@@ -57,23 +57,23 @@ function initByNPM(name, tplName, verbose) {
 function initByGit(name, repositoryUrl, verbose) {
     projectName = name;
     isVerbose = verbose;
-    createDirectory().then(function () {
+    createDirectory().then(function() {
         return gitCloneRepository(repositoryUrl);
-    }).then(function () {
+    }).then(function() {
         clearRepositoryGitFiles();
-    }).then(function () {
+    }).then(function() {
         return copy(repoPath);
-    }).then(function () {
+    }).then(function() {
         removeFakeFiles();
-    }).then(function () {
+    }).then(function() {
         removeTemplate(repoPath);
-    }).then(function () {
+    }).then(function() {
         rewritePackageJSON();
-    }).then(function () {
+    }).then(function() {
         return installDependencies();
-    }).then(function () {
+    }).then(function() {
         showSuccessMessage();
-    }).catch(function (error) {
+    }).catch(function(error) {
         console.error(error);
     });
 }
@@ -121,7 +121,7 @@ function checkAppName(appName) {
 }
 
 function createDirectory() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
         var dirPath = process.cwd();
         projectPath = path.join(dirPath, projectName);
@@ -135,7 +135,7 @@ function createDirectory() {
 }
 
 function installTemplatePackage() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         var command;
         var args;
         var child;
@@ -162,7 +162,7 @@ function installTemplatePackage() {
 }
 
 function gitCloneRepository(repositoryUrl) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         var command;
         var args;
         var child;
@@ -191,10 +191,10 @@ function gitCloneRepository(repositoryUrl) {
 }
 
 function copy(templatePath) {
-    return new Promise(function (resolve, reject) {
-        fs.copy(templatePath, projectPath).then(function () {
+    return new Promise(function(resolve, reject) {
+        fs.copy(templatePath, projectPath).then(function() {
             resolve();
-        }).catch(function (error) {
+        }).catch(function(error) {
             reject(error);
         });
     });
@@ -207,7 +207,7 @@ function rewritePackageJSON() {
         name: projectName,
         version: '1.0.0'
     };
-    Object.keys(packageJSON).forEach(function (key) {
+    Object.keys(packageJSON).forEach(function(key) {
         if (key.indexOf('_') !== 0 && ignorePackageJSONKeys.indexOf(key) === -1) {
             newPackageJSON[key] = packageJSON[key];
         }
@@ -216,7 +216,7 @@ function rewritePackageJSON() {
 }
 
 function installDependencies() {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         var command;
         var args;
         var child;
