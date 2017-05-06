@@ -36,7 +36,7 @@ program
     // .arguments('<project-directory>')
     .usage(`${chalk.green(generateCommand + ' <project-directory>')} [options]`)
     // .allowUnknownOption()
-    .on('--help', function () {
+    .on('--help', function() {
         showHelps();
     });
 
@@ -52,7 +52,7 @@ program
         'specify url of a git repository'
     )
     .allowUnknownOption()
-    .action(function (name, options) {
+    .action(function(name, options) {
         currentCommand = generateCommand;
         projectName = name;
         if (options[tplOption]) {
@@ -85,7 +85,7 @@ program
         'add url of a git repository'
     )
     .allowUnknownOption()
-    .action(function (name, options) {
+    .action(function(name, options) {
         currentCommand = addCommand;
         if (options[tplOption]) {
             templateName = name;
@@ -123,7 +123,7 @@ if (typeof projectName === 'undefined' && currentCommand === generateCommand) {
 }
 
 var generator = {
-    initTpl: function () {
+    initTpl: function() {
         if (templateName) {
             install.initByNPM(projectName, templateName);
         } else {
@@ -133,12 +133,12 @@ var generator = {
                 name: 'templateName',
                 message: 'Please specify a template',
                 choices: require(tplPath)
-            }).then(function (answers) {
+            }).then(function(answers) {
                 install.initByNPM(projectName, answers['templateName']);
             });
         }
     },
-    initRepo: function (repositoryUrl) {
+    initRepo: function(repositoryUrl) {
         if (repositoryUrl) {
             install.initByGit(projectName, repositoryUrl);
         } else {
@@ -148,20 +148,20 @@ var generator = {
                 name: 'repositoryUrl',
                 message: 'Please specify a repository',
                 choices: require(repoPath)
-            }).then(function (answers) {
+            }).then(function(answers) {
                 install.initByGit(projectName, answers['repositoryUrl']);
             });
         }
     },
-    addTpl: function () {
+    addTpl: function() {
         addTplOrRepo(templateName, tplPath);
     },
-    addRepo: function () {
+    addRepo: function() {
         addTplOrRepo(repositoryUrl, repoPath);
     }
 };
 
-generatorMethodName = currentCommand + upperCaseFisrtLetter(optionName);
+generatorMethodName = currentCommand + upperCaseFirstLetter(optionName);
 
 if (!generator[generatorMethodName]) {
     showHelps();
@@ -170,8 +170,8 @@ if (!generator[generatorMethodName]) {
 
 generator[generatorMethodName]();
 
-function upperCaseFisrtLetter(str) {
-    return str.replace(/\b(\w)|\s(\w)/g, function (m) {
+function upperCaseFirstLetter(str) {
+    return str.replace(/\b(\w)|\s(\w)/g, function(m) {
         return m.toUpperCase();
     });
 }
@@ -185,7 +185,7 @@ function addTplOrRepo(name, fileName) {
     }
 }
 
-function showHelps () {
+function showHelps() {
     console.log(`  command ${chalk.green('init <project-directory>')} to initialize project.`);
     console.log(
         `    ${chalk.cyan('--tpl [npm-package]')} to fetch template from npm `
